@@ -680,8 +680,11 @@ async def github_oauth_callback(request: Request, code: str, state: Optional[str
     except Exception as e:
         logger.exception("Unexpected error in GitHub OAuth callback:")
         if is_json_request:
-            raise HTTPException(status_code=500, detail=str(e))
-        return HTMLResponse(content=render_oauth_error_html(str(e)), status_code=500)
+            raise HTTPException(status_code=500, detail="Internal server error during OAuth callback.")
+        return HTMLResponse(
+            content=render_oauth_error_html("Internal server error during OAuth callback."),
+            status_code=500
+        )
 
 
 @router.post("/auth/github/token", summary="Login via existing GitHub Access Token")
