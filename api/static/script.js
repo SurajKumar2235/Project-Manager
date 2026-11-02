@@ -115,8 +115,18 @@ function renderPlanOutput(markdownText, title) {
   const outputContainer = document.getElementById('plan-output-container');
   if (!outputContainer) return;
 
-  // Convert markdown to clean HTML structure
-  let formattedHtml = markdownText
+  const escapeHtml = (text) =>
+    text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  const safeMarkdownText = escapeHtml(markdownText);
+
+  // Convert markdown to clean HTML structure (starting from escaped text)
+  let formattedHtml = safeMarkdownText
     .replace(/^# (.*$)/gim, '<h2 style="color:var(--flame-secondary);font-family:var(--font-heading);">$1</h2>')
     .replace(/^## (.*$)/gim, '<h3 style="color:var(--cyan-accent);margin-top:1rem;">$1</h3>')
     .replace(/^### (.*$)/gim, '<h4 style="color:var(--text-main);">$1</h4>')
@@ -131,7 +141,7 @@ function renderPlanOutput(markdownText, title) {
         <span class="badge badge-cyan">✨ AI Structured Plan</span>
         <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('plan-raw-content').innerText)">📋 Copy Markdown</button>
       </div>
-      <div id="plan-raw-content" style="display:none;">${markdownText}</div>
+      <div id="plan-raw-content" style="display:none;">${safeMarkdownText}</div>
       ${formattedHtml}
     </div>
   `;

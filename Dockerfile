@@ -3,14 +3,17 @@
 # Optimized for Amazon Container Registry (ECR), AWS ECS / Fargate, App Runner
 # ==============================================================================
 
-# Official uv image with Python 3.13 preinstalled on Debian Bookworm Slim
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+# Keep Python in /usr/local so the non-root runtime user can execute it.
+FROM python:3.13-slim-bookworm
 
 # Install system dependencies (curl and ca-certificates for health checks & TLS)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# Install uv into the base image instead of relying on paths in the uv image.
+RUN pip install --no-cache-dir uv
 
 # Configure container working directory
 WORKDIR /app
@@ -19,6 +22,7 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON=/usr/local/bin/python3 \
     PATH="/app/.venv/bin:$PATH" \
     PORT=8000 \
     PLANS_DIR="/data"
